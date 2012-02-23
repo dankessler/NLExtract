@@ -1,0 +1,6 @@
+../extract.conf~
+.ninjaproject/
+.ropeproject/
+*~
+src.nja
+
