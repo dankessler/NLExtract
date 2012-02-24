@@ -9,15 +9,16 @@ __date__ = "$Dec 21, 2011 00:00:01 AM$"
                - Je verbindt niet met een database, maar met een sid,
                  dat moet getest worden.
 
- Versie:       0.1
-               - Voor oracle 11g
+ Versie:       0.1 - Voor oracle 11g
 
  Datum:        21 december 2011
 """
 import cx_Oracle
 from bagconfig import BAGConfig
 
+
 class Database:
+
     def __init__(self, args):
         # Lees de configuratie uit BAG.conf
         self.args = args
@@ -64,13 +65,16 @@ class Database:
             self.cursor.execute(script)
             self.connection.commit()
             Log.log.info('script uitgevoerd')
-        except cx_Oracle.DatabaseError, e:
+        except cx_Oracle.DatabaseError:
+            e = sys.exc_info()[1]
             Log.log.error("fout: procedures :%s" % str(e))
 
     def verbind(self, initdb=False):
+
         try:
-            self.dsn = cx_Oracle.makedsn(self.host,self.port,self.sid)
-            self.connection = cx_Oracle.Connection(self.user, self.password, self.dsn)
+            self.dsn = cx_Oracle.makedsn(self.host, self.port, self.sid)
+            self.connection = cx_Oracle.Connection(
+                self.user, self.password, self.dsn)
             self.cursor = self.connection.cursor()
 
             if initdb:
@@ -78,8 +82,10 @@ class Database:
 
             self.zet_schema()
             Log.log.info("verbonden met sid %s" % (self.sid))
-        except Exception, e:
-            Log.log.error("fout %s: kan geen verbinding maken met sid %s" % (str(e), self.sid))
+        except Exception:
+            e = sys.exc_info()[1]
+            Log.log.error("fout %s: kan geen verbinding maken met sid %s" %
+            (str(e), self.sid))
             sys.exit()
 
     def uitvoeren(self, sql, parameters=None):
@@ -88,6 +94,8 @@ class Database:
                 self.cursor.execute(sql, parameters)
             else:
                 self.cursor.execute(sql)
-        except (cx_Oracle.IntegrityError, cx_Oracle.ProgrammingError), e:
-            Log.log.error("fout %s voor query: %s" % (str(e), str(self.cursor.mogrify(sql, parameters))))
+        except (cx_Oracle.IntegrityError, cx_Oracle.ProgrammingError):
+            e = sys.exc_info()[1]
+            Log.log.error("fout %s voor query: %s" %
+            (str(e), str(self.cursor.mogrify(sql, parameters))))
             return self.cursor.rowcount
