@@ -14,14 +14,11 @@ import os
 try:
     from ConfigParser import ConfigParser
 except:
-    #Log.log.debug("ConfigParser niet gevonden, switch naar configparser (python3))")
     from configparser import ConfigParser
 
 from logging import Log
 
 class BAGConfig:
-    # Singleton: sole static instance of Log to have a single Log object
-
 
     config = None
 
@@ -39,21 +36,23 @@ class BAGConfig:
         if not os.path.exists(config_file):
             Log.log.fatal(str(config_file) + " niet gevonden")
 
-        configdict = ConfigParser()
+        _configparser = ConfigParser()
         try:
-            configdict.read(config_file)
+            _configparser.read(config_file)
         except Exception:
             e = sys.exc_info()[1]
             Log.log.fatal(str(config_file) + " \n\t" + str(e))
 
         try:
             # Zet parameters uit config bestand
-            self.database = configdict.defaults()['database']
-            self.schema   = configdict.defaults()['schema']
-            self.host     = configdict.defaults()['host']
-            self.user     = configdict.defaults()['user']
-            self.password = configdict.defaults()['password']
-            self.port = configdict.defaults()['port']
+
+            self.soort = _configparser.defaults()['soort']
+            self.database = _configparser.defaults()['database']
+            self.schema = _configparser.defaults()['schema']
+            self.host = _configparser.defaults()['host']
+            self.user = _configparser.defaults()['user']
+            self.password = _configparser.defaults()['password']
+            self.port = _configparser.defaults()['port']
 
         except Exception:
             e = sys.exc_info()[1]
@@ -61,6 +60,8 @@ class BAGConfig:
 
         try:
             # Optioneel: overrulen met (commandline) args
+            #if args.soort:
+            #    self.soort = args.soort
             if args.database:
                 self.database = args.database
             if args.host:
@@ -83,7 +84,10 @@ class BAGConfig:
 
             # Assign Singleton (of heeft Python daar namespaces voor?) (Java achtergrond)
             BAGConfig.config = self
-        except:
-            Log.log.fatal(" het overrulen van configuratiebestand " + str(config_file) + " via commandline loopt spaak")
+        except Exception:
+            e = sys.exc_info()[1]
+            Log.log.fatal(" configuratiefout in " + str(config_file) + " " + str(e))
 
+    def __repr__(self):
+        return "<BAGConfig soort:%s database:%s schema: %s host:%s user:%s password:%s, port:%s>" % (self.soort, self.database, self.schema, self.host, self.user, self.password, self.port)
 
