@@ -24,9 +24,12 @@ from logging import Log
 
 #from lxml import etree
 try:
-  from cStringIO import StringIO
+    from cStringIO import StringIO
 except:
-  from StringIO import StringIO
+    try:
+        from StringIO import StringIO
+    except:
+        from io import StringIO
 
 class BAGFileReader:
     def __init__(self, file):
@@ -65,7 +68,7 @@ class BAGFileReader:
                 self.zip = zipfile.ZipFile(_file, "r")
                 self.readzipfile()
             else:
-                if os.path.isdir(_file) <> True:
+                if os.path.isdir(_file) != True:
                     zipfilename = each.split('.')
                     if len(zipfilename) == 2:
                         ext = zipfilename[1]
@@ -126,7 +129,7 @@ class BAGFileReader:
         xml = parse(naam)
         Log.log.endTimer("parseXML")
         return xml
-    
+
     def processXML(self,naam, xml):
         Log.log.info("processXML: " + naam)
         xmldoc = xml.documentElement
@@ -143,4 +146,3 @@ class BAGFileReader:
         # tabel woonplaats_gemeente
         myReader = csv.reader(fileobject, delimiter=';', quoting=csv.QUOTE_NONE)
         self.processor.processCSV(myReader)
-        
