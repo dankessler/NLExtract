@@ -10,7 +10,6 @@ Auteurs:       Stefan de Konink (initial), Just van den Broecke
 import argparse #apt-get install python-argparse
 import sys
 import os
-from postgresdb import Database
 from logging import Log
 from bagfilereader import BAGFileReader
 from bagconfig import BAGConfig
@@ -69,29 +68,41 @@ def main():
 
     # Print start time
     Log.log.time("Start")
+    if args.dbinit: #TODO geen args gebruiken maar BAGConfig. Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
+        database = None
+        if BAGConfig.config.soort == "postgres":
+            from postgresdb import Database
+            database = Database()
 
-    if args.dbinit:
-        # Dumps all tables and recreates them
+        elif BAGConfig.config.soort == "sqlite":
+            from sqlitedb import Database
+            database = Database()
+
+        else: #ga voorlopig uit van "none", in dit geval gewoon de sql dumpen naar stdout
+            database = None
+
         db_script = os.path.realpath(BAGConfig.config.bagextract_home + '/db/script/bag-db.sql')
         Log.log.info("alle database tabellen weggooien en opnieuw aanmaken...")
         database.initialiseer(db_script)
 
+        #TODO Willen we dit hardcoded?
         Log.log.info("Initieele data (bijv. gemeenten/provincies) inlezen...")
         myreader = BAGFileReader(BAGConfig.config.bagextract_home + '/db/data')
         myreader.process()
 
         Log.log.info("Views aanmaken...")
         db_script = os.path.realpath(BAGConfig.config.bagextract_home + '/db/script/bag-view-actueel-bestaand.sql')
+
         database.file_uitvoeren(db_script)
-    elif args.extract:
+    elif args.extract: #TODO geen args gebruiken maar BAGConfig. Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
         # Extracts any data from any source files/dirs/zips/xml/csv etc
-        myreader = BAGFileReader(args.extract)
+        myreader = BAGFileReader(BAGConfig.config.extract)
         myreader.process()
-    elif args.query:
+    elif args.query: #TODO geen args gebruiken maar BAGConfig. Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
         # Voer willekeurig SQL script uit uit
         database = Database()
 
-        database.file_uitvoeren(args.query)
+        database.file_uitvoeren(BAGConfig.config.query)
     else:
         Log.log.fatal("je geeft een niet-ondersteunde optie. Tip: probeer -h optie")
 
