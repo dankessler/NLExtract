@@ -11,11 +11,11 @@ __date__ = "$Dec 09, 2009 00:00:01 AM$"
  Datum:        29 dec 2011
 """
 
-import psycopg2
 from logging import Log
 from bagconfig import BAGConfig
 
 class Database:
+
     def __init__(self):
         # Lees de configuratie uit globaal BAGConfig object
         self.config = BAGConfig.config
@@ -30,7 +30,8 @@ class Database:
             self.cursor.execute(script)
             self.connection.commit()
             Log.log.info('script is uitgevoerd')
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError:
+            e = sys.exc_info()[1]
             Log.log.fatal("ik krijg deze fout '%s' uit het bestand '%s'" % (str(e), str(bestand)))
 
     def verbind(self, initdb=False):
@@ -46,7 +47,10 @@ class Database:
 
             self.zet_schema()
             Log.log.info("verbonden met de database %s" % (self.config.database))
-        except Exception, e:
+        except Exception:
+            e = sys.exc_info()[1]
+            #TODO: Deze code is niet zuiver. De werkelijke exception moet worden vermeld, of er
+            # moet expliciet op een verbindingsfout worden gezocht
             Log.log.fatal("ik kan geen verbinding maken met database '%s'" % (self.config.database))
 
     def maak_schema(self):
@@ -70,8 +74,9 @@ class Database:
                 self.cursor.execute(sql, parameters)
             else:
                 self.cursor.execute(sql)
-        except (Exception), e:
-            Log.log.error("fout %s voor query: %s met parameters %s" % (str(e), str(sql), str(parameters))  )
+        except Exception:
+            e = sys.exc_info()[1]
+            Log.log.error("fout %s voor query: %s met parameters %s" % (str(e), str(sql), str(parameters)))
             return self.cursor.rowcount
 
     def file_uitvoeren(self, sqlfile):
@@ -84,5 +89,6 @@ class Database:
             self.connection.commit()
             f.close()
             Log.log.info("SQL uitgevoerd OK")
-        except (Exception), e:
+        except (Exception):
+            e = sys.exc_info()[1]
             Log.log.fatal("ik kan dit script niet uitvoeren vanwege deze fout: %s" % (str(e)))

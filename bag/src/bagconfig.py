@@ -20,7 +20,7 @@ class BAGConfig:
 
     def __init__(self, args):
         # Derive home dir from script location
-        self.bagextract_home = os.path.realpath(os.path.dirname(sys.argv[0]) + '/..')
+        self.bagextract_home = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
         # Default config file
         config_file = os.path.realpath(self.bagextract_home + '/extract.conf')
@@ -29,15 +29,15 @@ class BAGConfig:
         if args.config:
             config_file = args.config
 
-        Log.log.info("Configuratiebestand is " + str(config_file))
         if not os.path.exists(config_file):
-            Log.log.fatal("ik kan het configuratiebestand '" + str(config_file) + "' ech niet vinden.")
+            Log.log.fatal(str(config_file) + " niet gevonden")
 
         configdict = ConfigParser()
         try:
             configdict.read(config_file)
-        except:
-            Log.log.fatal("ik kan " + str(config_file) + " wel vinden maar niet inlezen.")
+        except Exception:
+            e = sys.exc_info()[1]
+            Log.log.fatal(str(config_file) + " \n\t" + str(e))
 
         try:
             # Zet parameters uit config bestand
@@ -48,8 +48,9 @@ class BAGConfig:
             self.password = configdict.defaults()['password']
             self.port = configdict.defaults()['port']
 
-        except:
-            Log.log.fatal(" de inhoud van configuratiebestand " + str(config_file) + " is niet volledig.")
+        except Exception:
+            e = sys.exc_info()[1]
+            Log.log.fatal(str(config_file) + " \n\t" + str(e))
 
         try:
             # Optioneel: overrulen met (commandline) args

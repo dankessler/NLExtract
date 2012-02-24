@@ -1,14 +1,17 @@
 # To change this template, choose Tools | Templates
 # and open the template in the editor.
 
-__author__="miblon"
-__date__ ="$Jun 13, 2011 11:34:17 AM$"
+__author__ = "miblon"
+__date__ = "$Jun 13, 2011 11:34:17 AM$"
 
 from time import *
 import sys
 
 # An extremely simple Singleton logger
+
+
 class Log:
+
     # Singleton: sole static instance of Log to have a single Log object
     log = None
 
@@ -22,7 +25,7 @@ class Log:
         Log.log = self
 
     def pr(self, message):
-        print message
+        print(message)
         sys.stdout.flush()
 
     def debug(self, message):
@@ -33,24 +36,33 @@ class Log:
         Log.log.pr("INFO: " + message)
 
     def warn(self, message):
-        Log.log.pr("WARN:" + message)
+        Log.log.pr("FOUT:" + message)
 
     def error(self, message):
-        Log.log.pr("ERROR: " + message)
+        Log.log.pr("FOUT: " + message)
 
     def fatal(self, message):
-        Log.log.pr("FATAAL: sorry, ik kap ermee want " + message)
+        Log.log.pr("FOUT: " + message)
         sys.exit(-1)
 
     def time(self, message=""):
         self.info(message + " " + strftime("%Y-%m-%d %H:%M:%S", localtime()))
 
-    # Start (global) + print timer: useful to time for processing and optimization
     def startTimer(self, message=""):
+        """
+        Start (global) + print timer:
+        useful to time for processing and optimization
+        """
         Log.t1 = time()
         self.info("START: " + message)
 
-    # End (global) timer + print seconds passed: useful to time for processing and optimization
     def endTimer(self, message=""):
-        self.info("END: " + message + " Duration=" + str( round( (time() - Log.t1) , 0)) + " sec")
+        """
+        End (global) timer + print seconds passed:
+        useful to time for processing and optimization
+        """
+        self.info("END: " +
+            message +
+            " Duration=" + str(round((time() - Log.t1), 0)) + " sec")
+
 
