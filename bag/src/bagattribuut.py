@@ -147,7 +147,8 @@ class BAGattribuut:
 
     # Print informatie over het attribuut op het scherm
     def schrijf(self):
-        print "- %-27s: %s" % (self._naam, self._waarde)
+        #TODO: Geen goed idee om hier print te gebruiken. Gebruik de logger indien gewenst
+        print("- %-27s: %s" % (self._naam, self._waarde))
 
 #--------------------------------------------------------------------------------------------------------
 # Class         BAGenumAttribuut
@@ -466,7 +467,7 @@ class BAGmultiPolygoon(BAGpolygoon):
         wktGeometrie = ""
         xmlGeometrie = xml.getElementsByTagName(self._tag)[0]
         for xmlPolygoon in xmlGeometrie.getElementsByTagName("gml:Polygon"):
-            if wktGeometrie <> "":
+            if wktGeometrie != "":
                 wktGeometrie += ","
             wktGeometrie += self._leesXMLpolygoon(xmlPolygoon)
         self._waarde = "MULTIPOLYGON(" + wktGeometrie + ")"
@@ -639,10 +640,11 @@ class BAGrelatieAttribuut(BAGattribuut):
 
     # Print informatie over het attribuut op het scherm
     def schrijf(self):
+        #TODO: Geen goed idee om hier print te gebruiken. Gebruik de logger indien gewenst
         first = True
         for waarde in self._waarde:
             if first:
-                print "- %-27s: %s" % (self.naam(), waarde)
+                print("- %-27s: %s" % (self.naam(), waarde))
                 first = False
             else:
-                print "- %-27s  %s" % ("", waarde)
+                print("- %-27s  %s" % ("", waarde))

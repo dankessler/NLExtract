@@ -11,11 +11,18 @@
 import sys
 import os
 
-from ConfigParser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except:
+    #Log.log.debug("ConfigParser niet gevonden, switch naar configparser (python3))")
+    from configparser import ConfigParser
+
 from logging import Log
 
 class BAGConfig:
-   # Singleton: sole static instance of Log to have a single Log object
+    # Singleton: sole static instance of Log to have a single Log object
+
+
     config = None
 
     def __init__(self, args):

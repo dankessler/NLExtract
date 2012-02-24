@@ -99,7 +99,8 @@ class BAGObject:
 
     # Print informatie over het object op het scherm
     def schrijf(self):
-        print "*** %s ***" % (self.naam())
+        #TODO: Geen goed idee om hier print te gebruiken. Gebruik de logger indien gewenst
+        #print "*** %s ***" % (self.naam())
         for naam, attribuut in self.attributen.iteritems():
             attribuut.schrijf()
         for relatie in self.relaties:
