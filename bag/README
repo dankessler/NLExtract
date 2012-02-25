@@ -1,14 +1,20 @@
-bag-extract is onderdeel van de NLExtract tools voor het inlezen en verrijken van Kadaster BAG GML leveringen
-in (voorlopig) een Postgres/Postgis database.
+bagextract is ontstaan uit bagextract+ 
+(http://bag.vrom.nl/de_bag_gebruiken/bag_extract__) 
 
-bag-extract biedt de volgende functionaliteiten:
- - Laden van een Kadaster BAG Extract vanuit Kadaster (.zip GML) levering
- - Toepassen van Kadaster BAG mutaties vanuit Kadaster (.zip GML) levering
- - Verrijken BAG met gemeenten en provincies
- - Verrijken: tabel met volledige "ACN-achtige" adressen genereren
- - Stijlen (SLDs) om de ingelezen BAG data te visualiseren via een WMS
- - Validatie van input vlak geometrie
- - Database VIEWs om bagobjecten te selecteren die actueel, bestaand en valide geometrie hebben
+en is geschikt om de bestanden die via het Kadaster worden geleverd in 
+het kader van de "Basisregistraties Adressen en Gebouwen" (BAG)
+in te lezen, te verrijken en te gebruiken.
+
+In deze versie:
+ - Ondersteuning voor Postgres/Postgis database.
+ - Laden van Kadaster BAG Extract  (.zip GML)
+ - Laden van Kadaster BAG mutaties (.zip GML)
+ - Verrijken met gemeenten en provincies
+ - Adressentabel genereren
+ - Stijlen (SLD's) om de ingelezen BAG data te visualiseren
+ - Validatie van vlakgeometrie
+ - Database views om bagobjecten te selecteren die actueel, bestaand en 
+valide geometrie hebben
 
 Downloaden:
  - download NLExtract
@@ -18,19 +24,8 @@ Downloaden:
 Afhankelijkheden:
 
  - Python (minimaal versie 2.4.3 getest)
-
- - optioneel: Python package afhankelijkheden installeren bijv
-   apt-get of yum install python-setuptools (voor easy_install commando)
-   apt-get of yum install python-devel (tbv psycopg2 bibliotheek)
-   apt-get of yum install postgresql-devel (tbv psycopg2 bibliotheek)
-
- - installeer de PostgreSQL python bibliotheek psycopg2:
-   sudo easy_install psycopg2
-
- - indien je niet Python 3.0 of hoger hebt installeer Python package "argparse", bijv
-   sudo easy_install argparse
-
- - NB als je een proxy gebruikt via http_proxy  doe dan easy_install -E (exporteer huidge environment)
+ - psycopg2 (sudo easy_install psycopg2)
+ - argparse (sudo easy_install argparse)
 
 Commando:
  - direct via python "python src/bagextract.py"
