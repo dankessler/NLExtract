@@ -14,12 +14,12 @@ import logging
 try:
     import argparse #apt-get install python-argparse
 except:
+    formatter = logging.Formatter('%(levelname)s - %(message)s')
     logging.critical("Python argparse is vereist")
     sys.exit()
 
 
 from bagconfig import BAGConfig
-from bagfilereader import BAGFileReader
 
 class ArgParser(argparse.ArgumentParser):
 
@@ -81,7 +81,6 @@ def main():
 
     if args.dbinit: #TODO geen args gebruiken maar BAGConfig. Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
         database = None
-        BAGConfig.logger.info("help")
         if BAGConfig.config.soort == "postgres":
             from postgresdb import Database
             database = Database()
@@ -110,11 +109,22 @@ def main():
         myreader.process()
     elif args.query: #TODO geen args gebruiken maar BAGConfig. Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
         # Voer willekeurig SQL script uit uit
-        database = Database()
+        if BAGConfig.config.soort == "postgres":
+            from postgresdb import Database
+            database = Database()
+            database.maak_database()
+
+        elif BAGConfig.config.soort == "sqlite":
+            from sqlitedb import Database
+            database = Database()
+            database.maak_database()
+
+        else: #ga voorlopig uit van "none", in dit geval gewoon de sql dumpen naar stdout
+            database = None
 
         database.file_uitvoeren(BAGConfig.config.query)
     else:
-        BAGConfig.logger.critical("je geeft een niet-ondersteunde optie. Tip: probeer -h optie")
+        BAGConfig.logger.critical("Kan de opdracht niet verwerken. Type -h of --help voor een overzicht van parameters")
 
     # Print end time
     sys.exit()
