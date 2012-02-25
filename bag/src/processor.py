@@ -14,11 +14,11 @@ __date__ = "$Jun 14, 2011 11:11:01 AM$"
 
  OpenGeoGroep.nl
 """
-
+import logging
 from bagobject import BAGObjectFabriek
 from bestuurlijkobject import BestuurlijkObjectFabriek
 from postgresdb import Database
-from logging import Log
+
 
 class Processor:
     # TODO:
@@ -43,7 +43,7 @@ class Processor:
                 if object:
                     objecten.append(object)
                 else:
-                    Log.log.warn("Geen object gevonden voor " + str(record))
+                    logging.warn("Geen object gevonden voor " + str(record))
 
         # Verwerk het bestand, lees gemeente_woonplaatsen in de database
         Log.log.info("Insert objectCount=" + str(len(objecten)))
@@ -71,11 +71,11 @@ class Processor:
                             vraag = child
                         elif child.localName == "producten":
                             producten = child
-                            Log.log.startTimer("objCreate")
+                            #Log.log.startTimer("objCreate")
                             for productnode in producten.childNodes:
                                 if productnode.localName == 'LVC-product' and productnode.childNodes:
                                     self.bagObjecten = BAGObjectFabriek.bof.BAGObjectArrayBijXML(productnode.childNodes)
-                            Log.log.endTimer("objCreate - objs=" + str(len(self.bagObjecten)))
+                            #Log.log.endTimer("objCreate - objs=" + str(len(self.bagObjecten)))
 
         elif node.localName == 'BAG-Mutaties-Deelbestand-LVC':
             mode = 'Mutatie'
@@ -87,14 +87,14 @@ class Processor:
                     for child in antwoord.childNodes:
                         if child.localName == "producten":
                             producten = child
-                            Log.log.startTimer("objCreate (mutaties)")
+                            #Log.log.startTimer("objCreate (mutaties)")
                             for productnode in producten.childNodes:
                                 if productnode.localName == 'Mutatie-product' and productnode.childNodes:
                                     origineelObj = None
                                     nieuwObj = None
                                     for mutatienode in productnode.childNodes:
                                         if mutatienode.localName == 'Nieuw':
-                                            # Log.log.info("Nieuw Object")
+                                            #Log.log.info("Nieuw Object")
                                             self.bagObjecten.extend(
                                                 BAGObjectFabriek.bof.BAGObjectArrayBijXML(mutatienode.childNodes))
                                         elif mutatienode.localName == 'Origineel':
@@ -109,16 +109,16 @@ class Processor:
                                                 if nieuwObj and origineelObj:
                                                     nieuwObj.origineelObj = origineelObj
                                                     self.bagObjecten.append(nieuwObj)
-                                                    # Log.log.info("Wijziging Object")
+                                                    #Log.log.info("Wijziging Object")
                                                     origineelObj = None
                                                     nieuwObj = None
 
-                            Log.log.endTimer("objCreate (mutaties) - objs=" + str(len(self.bagObjecten)))
+                            #Log.log.endTimer("objCreate (mutaties) - objs=" + str(len(self.bagObjecten)))
         else:
-            Log.log.info("Niet-verwerkbare XML node: " + node.localName)
+            logger.warn("kan node niet verwerken: " + node.localName)
             return
 
-        Log.log.startTimer("dbStart mode = " + mode)
+        #Log.log.startTimer("dbStart mode = " + mode)
 
         self.database.verbind()
         rels = 0
@@ -141,7 +141,7 @@ class Processor:
                     rels += 1
 
         self.database.connection.commit()
-        Log.log.endTimer("dbEnd - nieuw=" + str(len(self.bagObjecten) - wijzigingen) + " gewijzigd=" + str(wijzigingen) + " rels=" + str(rels))
-        Log.log.info("------")
+        #Log.log.endTimer("dbEnd - nieuw=" + str(len(self.bagObjecten) - wijzigingen) + " gewijzigd=" + str(wijzigingen) + " rels=" + str(rels))
+        #Log.log.info("------")
 
 
