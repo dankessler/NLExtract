@@ -7,19 +7,26 @@ Omschrijving:  Universele starter voor de applicatie, console
 Auteurs:       Stefan de Konink (initial), Just van den Broecke
 """
 
-import argparse #apt-get install python-argparse
 import sys
 import os
-from logging import Log
-from bagfilereader import BAGFileReader
-from bagconfig import BAGConfig
+import logging
 
+try:
+    import argparse #apt-get install python-argparse
+except:
+    logging.critical("Python argparse is vereist")
+    sys.exit()
+
+
+from bagconfig import BAGConfig
+from bagfilereader import BAGFileReader
 
 class ArgParser(argparse.ArgumentParser):
 
     def error(self, message):
         self.print_help()
-        sys.exit(2)
+        sys.exit()
+
 
 def main():
 
@@ -60,40 +67,43 @@ def main():
 
     # Initialiseer
     args = parser.parse_args()
-    # Initialize singleton Log object so we can use one global instance
-    Log(args)
 
     # Init globale configuratie
     BAGConfig(args)
 
-    # Print start time
-    Log.log.time("Start")
+
+    #create logger
+
+    if args.verbose:
+        BAGConfig.logger.setLevel(logging.DEBUG)
+    else:
+        BAGConfig.logger.setLevel(logging.INFO)
+
     if args.dbinit: #TODO geen args gebruiken maar BAGConfig. Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
         database = None
+        BAGConfig.logger.info("help")
         if BAGConfig.config.soort == "postgres":
             from postgresdb import Database
             database = Database()
+            database.maak_database()
 
         elif BAGConfig.config.soort == "sqlite":
             from sqlitedb import Database
             database = Database()
+            database.maak_database()
 
         else: #ga voorlopig uit van "none", in dit geval gewoon de sql dumpen naar stdout
             database = None
 
-        db_script = os.path.realpath(BAGConfig.config.bagextract_home + '/db/script/bag-db.sql')
-        Log.log.info("alle database tabellen weggooien en opnieuw aanmaken...")
-        database.initialiseer(db_script)
-
         #TODO Willen we dit hardcoded?
-        Log.log.info("Initieele data (bijv. gemeenten/provincies) inlezen...")
-        myreader = BAGFileReader(BAGConfig.config.bagextract_home + '/db/data')
-        myreader.process()
+        #Log.log.info("Initieele data (bijv. gemeenten/provincies) inlezen...")
+        #myreader = BAGFileReader(BAGConfig.config.bagextract_home + '/db/data')
+        #myreader.process()
 
-        Log.log.info("Views aanmaken...")
-        db_script = os.path.realpath(BAGConfig.config.bagextract_home + '/db/script/bag-view-actueel-bestaand.sql')
+        #Log.log.info("Views aanmaken...")
+        #db_script = os.path.realpath(BAGConfig.config.bagextract_home + '/db/script/bag-view-actueel-bestaand.sql')
+        #database.file_uitvoeren(db_script)
 
-        database.file_uitvoeren(db_script)
     elif args.extract: #TODO geen args gebruiken maar BAGConfig. Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
         # Extracts any data from any source files/dirs/zips/xml/csv etc
         myreader = BAGFileReader(BAGConfig.config.extract)
@@ -104,10 +114,9 @@ def main():
 
         database.file_uitvoeren(BAGConfig.config.query)
     else:
-        Log.log.fatal("je geeft een niet-ondersteunde optie. Tip: probeer -h optie")
+        BAGConfig.logger.critical("je geeft een niet-ondersteunde optie. Tip: probeer -h optie")
 
     # Print end time
-    Log.log.time("End")
     sys.exit()
 
 if __name__ == "__main__":

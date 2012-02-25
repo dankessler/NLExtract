@@ -11,8 +11,15 @@ __date__ = "$Feb 24, 2012 00:00:01 AM$"
  Datum:        24 feb 2012
 """
 import sys
-import sqlite3
-from logging import Log
+import os
+import logging
+
+try:
+    import sqlite3
+except:
+    logging.critical("Python sqlite3 is niet geinstalleerd")
+    sys.exit()
+
 from bagconfig import BAGConfig
 
 class Database:
@@ -22,18 +29,24 @@ class Database:
         self.config = BAGConfig.config
 
     def initialiseer(self, bestand):
-        Log.log.info('Probeer te verbinden...')
+        logging.info('Probeer te verbinden...')
         self.verbind(True)
 
-        Log.log.info('database script uitvoeren...')
+        logging.info('database script uitvoeren...')
         try:
             script = open(bestand, 'r').read()
             self.cursor.executescript(script)
             self.connection.commit()
-            Log.log.info('script is uitgevoerd')
+            logging.info('script is uitgevoerd')
         except sqlite3.DatabaseError:
             e = sys.exc_info()[1]
-            Log.log.fatal("ik krijg deze fout '%s' uit het bestand '%s'" % (str(e), str(bestand)))
+            logging.critical("ik krijg deze fout '%s' uit het bestand '%s'" % (str(e), str(bestand)))
+            sys.exit()
+
+    def maak_database(self):
+        db_script = os.path.realpath(BAGConfig.config.bagextract_home + '/db/script/sqlite/bag-db.sql')
+        logging.info("alle database tabellen weggooien en opnieuw aanmaken...")
+        self.initialiseer(db_script)
 
     def verbind(self, initdb=False):
         try:
@@ -44,12 +57,13 @@ class Database:
                 self.maak_schema()
 
             self.zet_schema()
-            Log.log.info("verbonden met de database %s" % (self.config.database))
+            logging.info("verbonden met de database %s" % (self.config.database))
         except Exception:
             e = sys.exc_info()[1]
             #TODO: Deze code is niet zuiver. De werkelijke exception moet worden vermeld, of er
             # moet expliciet op een verbindingsfout worden gezocht
-            Log.log.fatal("ik kan geen verbinding maken met database '%s' %s" % (self.config.database,str(e)))
+            logging.critical("ik kan geen verbinding maken met database '%s' %s" % (self.config.database,str(e)))
+            sys.exit()
 
     def maak_schema(self):
         # Public schema: no further action required
@@ -74,19 +88,19 @@ class Database:
                 self.cursor.execute(sql)
         except Exception:
             e = sys.exc_info()[1]
-            Log.log.error("fout %s voor query: %s met parameters %s" % (str(e), str(sql), str(parameters)))
+            logging.error("fout %s voor query: %s met parameters %s" % (str(e), str(sql), str(parameters)))
             return self.cursor.rowcount
 
     def file_uitvoeren(self, sqlfile):
         try:
-            Log.log.info("SQL van file = %s uitvoeren..." % sqlfile)
+            logging.info("SQL van file = %s uitvoeren..." % sqlfile)
             self.verbind()
             f = open(sqlfile, 'r')
             sql = f.read()
             self.uitvoeren(sql)
             self.connection.commit()
             f.close()
-            Log.log.info("SQL uitgevoerd OK")
+            logging.info("SQL uitgevoerd OK")
         except (Exception):
             e = sys.exc_info()[1]
-            Log.log.fatal("ik kan dit script niet uitvoeren vanwege deze fout: %s" % (str(e)))
+            logging.critical("ik kan dit script niet uitvoeren vanwege deze fout: %s" % (str(e)))

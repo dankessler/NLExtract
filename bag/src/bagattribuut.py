@@ -13,7 +13,7 @@ __date__ = "Jan 9, 2012 3:46:27 PM$"
 
  OpenGeoGroep.nl
 """
-from logging import Log
+import logging
 
 # Geef de waarde van een textnode in XML
 def getText(nodelist):
@@ -244,7 +244,7 @@ class BAGbooleanAttribuut(BAGattribuut):
         elif self._waarde == '':
             self._waarde = None
         else:
-            Log.log.error("Onverwachte boolean waarde: '%s'" % (self._waarde))
+            logging.error("Onverwachte boolean waarde: '%s'" % (self._waarde))
 
 
 #--------------------------------------------------------------------------------------------------------
@@ -401,7 +401,7 @@ class BAGpoint(BAGgeoAttribuut):
                     self.polygonAttr.leesUitXML(xml)
 
         except:
-            Log.log.error("ik kan hier ech geen POINT van maken: %s (en zet dit op 0,0,0)" % str(point))
+            logging.error("ik kan hier ech geen POINT van maken: %s (en zet dit op 0,0,0)" % str(point))
             self._waarde = "POINT(0 0 0)"
 
 #--------------------------------------------------------------------------------------------------------
@@ -507,7 +507,7 @@ class BAGpolygoonOfpunt(BAGgeoAttribuut):
                 self._geoattr = BAGpolygoon(3, self._naam, self._tag)
 
         if not self._geoattr:
-            Log.log.error("Geen punt of vlak geometrie gevonden")
+            logging.error("Geen punt of vlak geometrie gevonden")
             return
 
         self._geoattr._parentObj = self._parentObj

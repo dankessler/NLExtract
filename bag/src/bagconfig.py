@@ -10,15 +10,27 @@
 #------------------------------------------------------------------------------
 import sys
 import os
+import logging
 
 try:
     from ConfigParser import ConfigParser
 except:
     from configparser import ConfigParser
 
-from logging import Log
+
 
 class BAGConfig:
+    logger = logging.getLogger('bagextractlog')
+    # create console handler and set level to debug
+    ch = logging.StreamHandler()
+    # create formatter
+    #formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(levelname)s - %(message)s')
+    # add formatter to ch
+    ch.setFormatter(formatter)
+
+    # add ch to logger
+    logger.addHandler(ch)
 
     config = None
 
