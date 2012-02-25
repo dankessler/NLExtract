@@ -12,14 +12,14 @@ __date__ = "$Dec 09, 2009 00:00:01 AM$"
 """
 import os
 import sys
-import logging
-#try:
-#    import psycopg2
-#except:
-#    logging.critical("Python psycopg2 is niet geinstalleerd")
-#    sys.exit()
-
 from bagconfig import BAGConfig
+try:
+   import psycopg2
+except:
+    BAGConfig.logger.critical("Python psycopg2 is niet geinstalleerd")
+    sys.exit()
+
+
 
 class Database:
 
@@ -28,22 +28,22 @@ class Database:
         self.config = BAGConfig.config
 
     def initialiseer(self, bestand):
-        logging.info('Database verbinding wordt gemaakt')
+        BAGConfig.logger.info('Database verbinding wordt gemaakt')
         self.verbind(True)
 
         try:
             script = open(bestand, 'r').read()
             self.cursor.execute(script)
             self.connection.commit()
-            logging.info('Gereed')
+            BAGConfig.logger.info('Gereed')
         except psycopg2.DatabaseError:
             e = sys.exc_info()[1]
-            logging.critical("'%s' tijdens het inlezen van '%s'" % (str(e), str(bestand)))
+            BAGConfig.logger.critical("'%s' tijdens het inlezen van '%s'" % (str(e), str(bestand)))
             sys.exit()
 
     def maak_database(self):
         db_script = os.path.realpath(BAGConfig.config.bagextract_home + '/db/script/bag-db.sql')
-        logging.info("De database wordt opnieuw ingericht")
+        BAGConfig.logger.info("De database wordt opnieuw ingericht")
         self.initialiseer(db_script)
 
     def verbind(self, initdb=False):
@@ -58,10 +58,10 @@ class Database:
                 self.maak_schema()
 
             self.zet_schema()
-            logging.info("verbonden met database %s" % (self.config.database))
+            BAGConfig.logger.info("verbonden met database %s" % (self.config.database))
         except Exception:
             e = sys.exc_info()[1]
-            logging.critical("ik kan geen verbinding maken met database '%s' %s" % (self.config.database,str(e)))
+            BAGConfig.logger.critical("ik kan geen verbinding maken met database '%s' %s" % (self.config.database,str(e)))
             #TODO: Bepalen of hier connecties en cursors moeten worden gesloten
             sys.exit()
 
@@ -88,19 +88,19 @@ class Database:
                 self.cursor.execute(sql)
         except Exception:
             e = sys.exc_info()[1]
-            logging.error("fout %s voor query: %s met parameters %s" % (str(e), str(sql), str(parameters)))
+            BAGConfig.logger.error("fout %s voor query: %s met parameters %s" % (str(e), str(sql), str(parameters)))
             return self.cursor.rowcount
 
     def file_uitvoeren(self, sqlfile):
         try:
-            logging.info("SQL van file = %s uitvoeren..." % sqlfile)
+            BAGConfig.logger.info("SQL van file = %s uitvoeren..." % sqlfile)
             self.verbind()
             f = open(sqlfile, 'r')
             sql = f.read()
             self.uitvoeren(sql)
             self.connection.commit()
             f.close()
-            logging.info("SQL uitgevoerd OK")
+            BAGConfig.logger.info("SQL uitgevoerd OK")
         except (Exception):
             e = sys.exc_info()[1]
-            logging.fatal("ik kan dit script niet uitvoeren vanwege deze fout: %s" % (str(e)))
+            BAGConfig.logger.fatal("ik kan dit script niet uitvoeren vanwege deze fout: %s" % (str(e)))
