@@ -105,7 +105,8 @@ def main():
 
     elif args.extract: #TODO geen args gebruiken maar BAGConfig. Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
         # Extracts any data from any source files/dirs/zips/xml/csv etc
-        myreader = BAGFileReader(BAGConfig.config.extract)
+        from bagfilereader import BAGFileReader
+        myreader = BAGFileReader(args.extract)
         myreader.process()
     elif args.query: #TODO geen args gebruiken maar BAGConfig. Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
         # Voer willekeurig SQL script uit uit

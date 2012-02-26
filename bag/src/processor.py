@@ -14,7 +14,7 @@ __date__ = "$Jun 14, 2011 11:11:01 AM$"
 
  OpenGeoGroep.nl
 """
-import logging
+from bagconfig import BAGConfig
 from bagobject import BAGObjectFabriek
 from bestuurlijkobject import BestuurlijkObjectFabriek
 from postgresdb import Database
@@ -43,10 +43,10 @@ class Processor:
                 if object:
                     objecten.append(object)
                 else:
-                    logging.warn("Geen object gevonden voor " + str(record))
+                    BAGConfig.logger.warn("Geen object gevonden voor " + str(record))
 
         # Verwerk het bestand, lees gemeente_woonplaatsen in de database
-        Log.log.info("Insert objectCount=" + str(len(objecten)))
+        BAGConfig.logger.info("Insert objectCount=" + str(len(objecten)))
         self.database.verbind()
         self.database.connection.set_client_encoding('LATIN1')
         for object in objecten:
@@ -115,7 +115,7 @@ class Processor:
 
                             #Log.log.endTimer("objCreate (mutaties) - objs=" + str(len(self.bagObjecten)))
         else:
-            logger.warn("kan node niet verwerken: " + node.localName)
+            BAGConfig.logger.warn("kan node niet verwerken: " + node.localName)
             return
 
         #Log.log.startTimer("dbStart mode = " + mode)
