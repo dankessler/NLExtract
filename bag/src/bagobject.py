@@ -25,7 +25,7 @@ __date__ = "Dec 21, 2011 3:46:27 PM$"
 
  OpenGeoGroep.nl
 """
-import logging
+import sys
 from bagattribuut import *
 
 
@@ -87,8 +87,12 @@ class BAGObject:
 
     # Initialisatie vanuit XML
     def leesUitXML(self, xml):
-        for naam, attribuut in self.attributen.iteritems():
-            attribuut.leesUitXML(xml)
+        if sys.version_info[0] == 3:
+            for naam, attribuut in self.attributen.items():
+                attribuut.leesUitXML(xml)
+        elif sys.version_info[0] == 2:
+            for naam, attribuut in self.attributen.iteritems():
+                attribuut.leesUitXML(xml)
 
         for relatie in self.relaties:
             relatie.leesUitXML(xml)
@@ -101,8 +105,13 @@ class BAGObject:
     def schrijf(self):
         #TODO: Geen goed idee om hier print te gebruiken. Gebruik de logger indien gewenst
         #print "*** %s ***" % (self.naam())
-        for naam, attribuut in self.attributen.iteritems():
-            attribuut.schrijf()
+        if sys.version_info[0] == 3:
+            for naam, attribuut in self.attributen.items():
+                attribuut.schrijf()
+        elif sys.version_info[0] == 2:
+            for naam, attribuut in self.attributen.iteritems():
+                attribuut.schrijf()
+
         for relatie in self.relaties:
              relatie.schrijf()
 
@@ -111,14 +120,28 @@ class BAGObject:
         velden = ""
         waardes = ""
         self.inhoud = []
-        for naam, attribuut in self.attributen.iteritems():
-            if velden != "":
-                velden += ","
-                waardes += ","
 
-            velden += attribuut.naam()
-            waardes += attribuut.waardeSQLTpl()
-            self.inhoud.append(attribuut.waardeSQL())
+        if sys.version_info[0] == 3:
+            for naam, attribuut in self.attributen.items():
+                attribuut.schrijf()
+                if velden != "":
+                    velden += ","
+                    waardes += ","
+
+                velden += attribuut.naam()
+                waardes += attribuut.waardeSQLTpl()
+                self.inhoud.append(attribuut.waardeSQL())
+
+        elif sys.version_info[0] == 2:
+            for naam, attribuut in self.attributen.iteritems():
+                attribuut.schrijf()
+                if velden != "":
+                    velden += ","
+                    waardes += ","
+
+                velden += attribuut.naam()
+                waardes += attribuut.waardeSQLTpl()
+                self.inhoud.append(attribuut.waardeSQL())
 
         self.sql = "INSERT INTO " + self.naam() + " (" + velden + ") VALUES (" + waardes + ")"
 
