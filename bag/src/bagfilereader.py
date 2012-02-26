@@ -15,7 +15,6 @@ __date__ = "$Jun 11, 2011 3:46:27 PM$"
  OpenGeoGroep.nl
 """
 import os
-import logging
 
 try:
     import zipfile
@@ -23,6 +22,7 @@ except:
     logging.critical("Python zipfile is vereist")
     sys.exit()
 
+from bagconfig import BAGConfig
 from processor import Processor
 from xml.dom.minidom import parse
 import csv
@@ -49,7 +49,7 @@ class BAGFileReader:
         self.recordCount = 0
 
     def process(self):
-        Log.log.info("process file=" + self.file)
+        BAGConfig.logger.info("process file=" + self.file)
         if not os.path.exists(self.file):
             logging.critical("ik kan BAG-bestand of -directory: '" + self.file + "' ech niet vinden")
             return
@@ -82,20 +82,20 @@ class BAGFileReader:
                     if len(zipfilename) == 2:
                         ext = zipfilename[1]
                         if ext == 'xml':
-                            Log.log.info("==> XML File: " + each)
+                            BAGConfig.logger.info("==> XML File: " + each)
                             xml = self.parseXML(_file)
                             self.processXML(zipfilename[0],xml)
                         if ext == 'csv':
-                            Log.log.info("==> CSV File: " + each)
+                            BAGConfig.logger.info("==> CSV File: " + each)
                             fileobject = open(_file, "rb")
                             self.processCSV(zipfilename[0],fileobject)
 
     def readzipfile(self):
         tzip = self.zip
-        logging.info("readzipfile content=" + str(tzip.namelist()))
+        BAGConfig.logger.info("readzipfile content=" + str(tzip.namelist()))
         for naam in tzip.namelist():
             ext = naam.split('.')
-            logging.info("readzipfile: " + naam)
+            BAGConfig.logger.info("readzipfile: " + naam)
             if len(ext) == 2:
                 if ext[1] == 'xml':
                     xml = self.parseXML(StringIO(tzip.read(naam)))
@@ -104,11 +104,11 @@ class BAGFileReader:
                 elif ext[1] == 'zip':
                     self.readzipstring(StringIO(tzip.read(naam)))
                 elif ext[1] == 'csv':
-                    Log.log.info(naam)
+                    BAGConfig.logger.info(naam)
                     fileobject = StringIO(tzip.read(naam))
                     self.processCSV(naam, fileobject)
                 else:
-                    Log.log.info("Negeer: " + naam)
+                    BAGConfig.logger.warn("Negeer: " + naam)
 
     def readzipstring(self,naam):
         # logging.info("readzipstring naam=" + naam)
@@ -116,7 +116,7 @@ class BAGFileReader:
         # logging.info("readzipstring naam=" + tzip.getinfo().filename)
 
         for nested in tzip.namelist():
-            logging.info("readzipstring: " + nested)
+            BAGConfig.logger.info("readzipstring: " + nested)
             ext = nested.split('.')
             if len(ext) == 2:
                 if ext[1] == 'xml':
@@ -131,7 +131,7 @@ class BAGFileReader:
                     #Log.log.info(nested)
                     self.readzipstring(StringIO(tzip.read(nested)))
                 else:
-                    logging.info("Negeer: " + nested)
+                    BAGConfig.logger.info("Negeer: " + nested)
 
     def parseXML(self,naam):
         #Log.log.startTimer("parseXML")
@@ -140,7 +140,7 @@ class BAGFileReader:
         return xml
 
     def processXML(self,naam, xml):
-        logging.info("processXML: " + naam)
+        BAGConfig.logger.info("processXML: " + naam)
         xmldoc = xml.documentElement
         #xmldoc = xml.getroot()
         #de orm bepaalt of het een extract of een mutatie is
@@ -149,7 +149,7 @@ class BAGFileReader:
         xml.unlink()
 
     def processCSV(self,naam, fileobject):
-        logging.info(naam)
+        BAGConfig.logger.info(naam)
         # TODO: zorg voor de verwerking van het geparste csv bestand
         # Maak er gemeente_woonplaats objecten van overeenkomstig de nieuwe
         # tabel woonplaats_gemeente

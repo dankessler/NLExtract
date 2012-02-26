@@ -25,7 +25,7 @@ class BAGConfig:
     ch = logging.StreamHandler()
     # create formatter
     #formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    formatter = logging.Formatter('%(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     # add formatter to ch
     ch.setFormatter(formatter)
 
@@ -46,14 +46,14 @@ class BAGConfig:
             config_file = args.config
 
         if not os.path.exists(config_file):
-            Log.log.fatal(str(config_file) + " niet gevonden")
+            self.logger.critical(str(config_file) + " niet gevonden")
 
         _configparser = ConfigParser()
         try:
             _configparser.read(config_file)
         except Exception:
             e = sys.exc_info()[1]
-            Log.log.fatal(str(config_file) + " \n\t" + str(e))
+            self.logger.critical(str(config_file) + " \n\t" + str(e))
 
         try:
             # Zet parameters uit config bestand
@@ -68,7 +68,7 @@ class BAGConfig:
 
         except Exception:
             e = sys.exc_info()[1]
-            Log.log.fatal(str(config_file) + " \n\t" + str(e))
+            self.logger.critical(str(config_file) + " \n\t" + str(e))
 
         try:
             # Optioneel: overrulen met (commandline) args
@@ -98,7 +98,7 @@ class BAGConfig:
             BAGConfig.config = self
         except Exception:
             e = sys.exc_info()[1]
-            Log.log.fatal(" configuratiefout in " + str(config_file) + " " + str(e))
+            self.logger.critical(" configuratiefout in " + str(config_file) + " " + str(e))
 
     def __repr__(self):
         return "<BAGConfig soort:%s database:%s schema: %s host:%s user:%s password:%s, port:%s>" % (self.soort, self.database, self.schema, self.host, self.user, self.password, self.port)
