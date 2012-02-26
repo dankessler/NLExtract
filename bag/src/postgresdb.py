@@ -35,7 +35,7 @@ class Database:
             script = open(bestand, 'r').read()
             self.cursor.execute(script)
             self.connection.commit()
-            BAGConfig.logger.info('Gereed')
+
         except psycopg2.DatabaseError:
             e = sys.exc_info()[1]
             BAGConfig.logger.critical("'%s' tijdens het inlezen van '%s'" % (str(e), str(bestand)))

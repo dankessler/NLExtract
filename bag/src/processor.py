@@ -36,7 +36,8 @@ class Processor:
 
     def processCSV(self, csvreader):
         objecten = []
-        cols = csvreader.next()
+        cols = next(csvreader)
+        BAGConfig.logger.debug(cols)
         for record in csvreader:
             if record[0]:
                 object = BestuurlijkObjectFabriek(cols, record)

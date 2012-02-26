@@ -128,6 +128,7 @@ def main():
         BAGConfig.logger.critical("Kan de opdracht niet verwerken. Type -h of --help voor een overzicht van parameters")
 
     # Print end time
+    BAGConfig.logger.info("Gereed")
     sys.exit()
 
 if __name__ == "__main__":
