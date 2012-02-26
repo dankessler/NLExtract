@@ -15,7 +15,7 @@ __date__ = "$Jun 11, 2011 3:46:27 PM$"
  OpenGeoGroep.nl
 """
 import os
-
+import sys
 try:
     import zipfile
 except:
@@ -32,13 +32,13 @@ import csv
 
 #Onderstaand try/catch blok is vereist voor python2/python3 portabiliteit
 try:
-    from cStringIO import StringIO
+    from io import StringIO #Python3
+    from io import BytesIO #Python3
 except:
     try:
-        from StringIO import StringIO
+        from cStringIO import StringIO #probeer cStringIO, faster
     except:
-        from io import StringIO
-
+        from StringIO import StringIO #StringIO, standaard
 
 class BAGFileReader:
     def __init__(self, file):
@@ -98,14 +98,25 @@ class BAGFileReader:
             BAGConfig.logger.info("readzipfile: " + naam)
             if len(ext) == 2:
                 if ext[1] == 'xml':
-                    xml = self.parseXML(StringIO(tzip.read(naam)))
+                    try:
+                        xml = self.parseXML(BytesIO(tzip.read(naam))) #Python3
+                    except:
+                        xml = self.parseXML(StringIO(tzip.read(naam)))
                     #xml = etree.parse (StringIO(tzip.read(naam)))
                     self.processXML(naam, xml)
                 elif ext[1] == 'zip':
-                    self.readzipstring(StringIO(tzip.read(naam)))
+                    try:
+                        self.readzipstring(BytesIO(tzip.read(naam))) #Python3
+                    except:
+                        self.readzipstring(StringIO(tzip.read(naam)))
+
                 elif ext[1] == 'csv':
                     BAGConfig.logger.info(naam)
-                    fileobject = StringIO(tzip.read(naam))
+                    try:
+                        fileobject = BytesIO(tzip.read(naam)) #Python3
+                    except:
+                        fileobject = StringIO(tzip.read(naam))
+
                     self.processCSV(naam, fileobject)
                 else:
                     BAGConfig.logger.warn("Negeer: " + naam)
@@ -120,16 +131,26 @@ class BAGFileReader:
             ext = nested.split('.')
             if len(ext) == 2:
                 if ext[1] == 'xml':
-                    xml = self.parseXML(StringIO(tzip.read(nested)))
+                    try:
+                        xml = self.parseXML(BytesIO(tzip.read(nested)))
+                    except:
+                        xml = self.parseXML(StringIO(tzip.read(nested)))
+
                     #xml = etree.parse(StringIO(tzip.read(nested)))
                     self.processXML(nested, xml)
                 elif ext[1] == 'csv':
                     #Log.log.info(nested)
-                    fileobject = StringIO(tzip.read(nested))
+                    try:
+                        fileobject = BytesIO(tzip.read(nested))
+                    except:
+                        fileobject = StringIO(tzip.read(nested))
+
                     self.processCSV(nested, fileobject)
                 elif ext[1] == 'zip':
-                    #Log.log.info(nested)
-                    self.readzipstring(StringIO(tzip.read(nested)))
+                    try:
+                        self.readzipstring(BytesIO(tzip.read(nested)))
+                    except:
+                        self.readzipstring(StringIO(tzip.read(nested)))
                 else:
                     BAGConfig.logger.info("Negeer: " + nested)
 
@@ -153,5 +174,13 @@ class BAGFileReader:
         # TODO: zorg voor de verwerking van het geparste csv bestand
         # Maak er gemeente_woonplaats objecten van overeenkomstig de nieuwe
         # tabel woonplaats_gemeente
-        myReader = csv.reader(fileobject, delimiter=';', quoting=csv.QUOTE_NONE)
+
+        # TODO: Dirty version hack. Er blijkt in python2 ook een TextIOWrapper te zitten, maar deze veroorzaakt
+        #       encoding issues die ik zo snel niet kreeg opgelost. Zo dan maar:
+        if sys.version_info[0] == 3:
+            from io import TextIOWrapper
+            myReader = csv.reader(TextIOWrapper(fileobject,'iso-8859-15'), delimiter=';', quoting=csv.QUOTE_NONE)
+        elif sys.version_info[0] == 2:
+            myReader = csv.reader(fileobject, delimiter=';', quoting=csv.QUOTE_NONE)
+
         self.processor.processCSV(myReader)
