@@ -18,7 +18,7 @@ except:
     logging.critical("Python argparse is vereist")
     sys.exit()
 
-
+#Switch van root logger naar Algemene logger
 from bagconfig import BAGConfig
 
 class ArgParser(argparse.ArgumentParser):

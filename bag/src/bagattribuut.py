@@ -13,7 +13,7 @@ __date__ = "Jan 9, 2012 3:46:27 PM$"
 
  OpenGeoGroep.nl
 """
-import logging
+from bagconfig import BAGConfig
 
 # Geef de waarde van een textnode in XML
 def getText(nodelist):
@@ -33,7 +33,6 @@ def getValues(parent, tag):
     # omgevingen (PDOK) hebben helaas nog Python 2.4.3
     # Splits in max 2 elementen, bijv.  ['bag_LVC:gerelateerdeAdressen', 'bag_LVC:nevenadres/bag_LVC:identificatie']
     tags = tag.split("/", 1)
-    # print str(tags)
     for node in parent.getElementsByTagName(tags[0]):
         # getElementsByTagName geeft alle elementen met die tag die ergens onder de parent hangen.
         # We gebruiken hier echter alleen die elementen die rechtstreeks onder de parent hangen.
@@ -145,10 +144,9 @@ class BAGattribuut:
         if self._naam == "einddatumTijdvakGeldigheid" and self._waarde == "2299123100000000":
             self._waarde = None
 
-    # Print informatie over het attribuut op het scherm
     def schrijf(self):
         #TODO: Geen goed idee om hier print te gebruiken. Gebruik de logger indien gewenst
-        print("- %-27s: %s" % (self._naam, self._waarde))
+        BAGConfig.logger.debug("- %-27s: %s" % (self._naam, self._waarde))
 
 #--------------------------------------------------------------------------------------------------------
 # Class         BAGenumAttribuut
@@ -644,7 +642,7 @@ class BAGrelatieAttribuut(BAGattribuut):
         first = True
         for waarde in self._waarde:
             if first:
-                print("- %-27s: %s" % (self.naam(), waarde))
+                BAGConfig.logger.debug("- %-27s: %s" % (self.naam(), waarde))
                 first = False
             else:
-                print("- %-27s  %s" % ("", waarde))
+                BAGConfig.logger.debug("- %-27s  %s" % ("", waarde))
