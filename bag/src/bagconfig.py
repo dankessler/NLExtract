@@ -100,6 +100,20 @@ class BAGConfig:
 
     def __repr__(self):
         return "<BAGConfig soort:%s database:%s schema: %s host:%s user:%s password:%s, port:%s>" % (self.soort, self.database, self.schema, self.host, self.user, self.password, self.port)
+        
+    def get_database(self):
+        if self.soort == "postgres":
+            from postgresdb import Database
+            return Database()
+
+        elif self.soort == "sqlite":
+            from sqlitedb import Database
+            return Database()
+            
+        else: #ga voorlopig uit van "postgres"
+            from postgresdb import Database
+            return Database()
+
 
 
 
