@@ -69,32 +69,19 @@ def main():
     args = parser.parse_args()
 
     # Init globale configuratie
-    BAGConfig(args)
+    myconfig = BAGConfig(args)
 
 
     #create logger
 
     if args.verbose:
-        BAGConfig.logger.setLevel(logging.DEBUG)
+        myconfig.logger.setLevel(logging.DEBUG)
     else:
-        BAGConfig.logger.setLevel(logging.INFO)
+        myconfig.logger.setLevel(logging.INFO)
 
     if args.dbinit: #TODO geen args gebruiken maar BAGConfig. Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
-        database = None
-        if BAGConfig.config.soort == "postgres":
-            from postgresdb import Database
-            database = Database()
-            database.maak_database()
-
-        elif BAGConfig.config.soort == "sqlite":
-            from sqlitedb import Database
-            database = Database()
-            database.maak_database()
-
-        else: #ga voorlopig uit van "postgres"
-            from postgresdb import Database
-            database = Database()
-            database.maak_database()
+        mydb = myconfig.get_database()
+        mydb.maak_database()
 
     elif args.extract:
         # TODO geen args gebruiken maar BAGConfig.
@@ -108,25 +95,14 @@ def main():
         #TODO geen args gebruiken maar BAGConfig.
         # Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
         # Voer willekeurig SQL script uit uit
-        if BAGConfig.config.soort == "postgres":
-            from postgresdb import Database
-            database = Database()
-
-        elif BAGConfig.config.soort == "sqlite":
-            from sqlitedb import Database
-            database = Database()
-
-        else: #ga voorlopig uit van "postgres"
-            from postgresdb import Database
-            database = Database()
-
-        database.file_uitvoeren(BAGConfig.config.query)
+        mydb = myconfig.get_database()
+        mydb.file_uitvoeren(myconfig.query)
 
     else:
-        BAGConfig.logger.critical("Kan de opdracht niet verwerken. Type -h of --help voor een overzicht van parameters")
+        myconfig.logger.critical("Kan de opdracht niet verwerken. Type -h of --help voor een overzicht van parameters")
 
     # Print end time
-    BAGConfig.logger.info("Gereed")
+    myconfig.logger.info("Gereed")
     sys.exit()
 
 if __name__ == "__main__":
