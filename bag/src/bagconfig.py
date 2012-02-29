@@ -32,8 +32,6 @@ class BAGConfig:
     # add ch to logger
     logger.addHandler(ch)
 
-    config = None
-
     def __init__(self, args):
         # Derive home dir from script location
         self.bagextract_home = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -102,4 +100,6 @@ class BAGConfig:
 
     def __repr__(self):
         return "<BAGConfig soort:%s database:%s schema: %s host:%s user:%s password:%s, port:%s>" % (self.soort, self.database, self.schema, self.host, self.user, self.password, self.port)
+
+
 

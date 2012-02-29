@@ -68,7 +68,8 @@ class BAGFileReader:
                 self.processXML(zipfilename[0],xml)
             if ext == 'csv':
                 fileobject = open(self.file, "rb")
-                self.processCSV(zipfilename[0], fileobject)
+                objecten = self.processCSV(zipfilename[0], fileobject)
+                # TODO: verwerken!
 
     def readDir(self):
         for each in os.listdir(self.file):
@@ -88,7 +89,8 @@ class BAGFileReader:
                         if ext == 'csv':
                             BAGConfig.logger.info("==> CSV File: " + each)
                             fileobject = open(_file, "rb")
-                            self.processCSV(zipfilename[0],fileobject)
+                            objecten = self.processCSV(zipfilename[0],fileobject)
+                            return objecten
 
     def readzipfile(self):
         tzip = self.zip
@@ -117,7 +119,8 @@ class BAGFileReader:
                     except:
                         fileobject = StringIO(tzip.read(naam))
 
-                    self.processCSV(naam, fileobject)
+                    objecten = self.processCSV(naam, fileobject)
+                    return objecten
                 else:
                     BAGConfig.logger.warn("Negeer: " + naam)
 
@@ -145,7 +148,9 @@ class BAGFileReader:
                     except:
                         fileobject = StringIO(tzip.read(nested))
 
-                    self.processCSV(nested, fileobject)
+                    objecten = self.processCSV(nested, fileobject)
+                    return objecten
+
                 elif ext[1] == 'zip':
                     try:
                         self.readzipstring(BytesIO(tzip.read(nested)))
@@ -183,4 +188,5 @@ class BAGFileReader:
         elif sys.version_info[0] == 2:
             myReader = csv.reader(fileobject, delimiter=';', quoting=csv.QUOTE_NONE)
 
-        self.processor.processCSV(myReader)
+        objecten = self.processor.processCSV(myReader)
+        return objecten

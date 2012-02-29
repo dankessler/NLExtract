@@ -33,11 +33,11 @@ class Database:
         self.zet_schema()
 
         try:
-            BAGConfig.logger.info("database script wordt gelezen")
+            BAGConfig.logger.info("Database script wordt gelezen")
             script = open(bestand, 'r').read()
             self.cursor.execute(script)
             self.connection.commit()
-            BAGConfig.logger.info("database script uitgevoerd")
+            BAGConfig.logger.info("Database script uitgevoerd")
         except psycopg2.DatabaseError:
             e = sys.exc_info()[1]
             BAGConfig.logger.critical("'%s' tijdens het inlezen van '%s'" % (str(e), str(bestand)))
@@ -90,29 +90,38 @@ class Database:
 
                     self.connection.rollback()
                     e = sys.exc_info()[1]
-                    BAGConfig.logger.error("Schema %s kon niet worden gemaakt: %s" % (self.config.schema,str(e)))
+                    BAGConfig.logger.error("Schema %s kon niet worden gemaakt: %s" % (self.config.schema, str(e)))
 
     def uitvoeren(self, sql, parameters=None):
         try:
             if parameters:
+                BAGConfig.logger.debug("postgresdb.uitvoeren(%s, %s)" % (sql, parameters))
                 self.cursor.execute(sql, parameters)
             else:
+                BAGConfig.logger.debug("postgresdb.uitvoeren(%s)" % sql)
                 self.cursor.execute(sql)
+
+            self.connection.commit()
+
         except Exception:
+            self.connection.rollback()
             e = sys.exc_info()[1]
-            BAGConfig.logger.error("fout %s voor query: %s met parameters %s" % (str(e), str(sql), str(parameters)))
-            return self.cursor.rowcount
+            BAGConfig.logger.error("%s" % str(e))
+
 
     def file_uitvoeren(self, sqlfile):
+        BAGConfig.logger.debug("postgresdb.file_uitvoeren(%s)" % sqlfile)
         try:
-            BAGConfig.logger.info("SQL van file = %s uitvoeren..." % sqlfile)
+            BAGConfig.logger.info("Script %s wordt uitgevoerd" % sqlfile)
             self.verbind()
             f = open(sqlfile, 'r')
             sql = f.read()
             self.uitvoeren(sql)
             self.connection.commit()
             f.close()
-            BAGConfig.logger.info("SQL uitgevoerd OK")
+
         except (Exception):
+
+            self.connection.rollback()
             e = sys.exc_info()[1]
-            BAGConfig.logger.fatal("ik kan dit script niet uitvoeren vanwege deze fout: %s" % (str(e)))
+            BAGConfig.logger.critical("ik kan dit script niet uitvoeren vanwege deze fout: %s" % (str(e)))

@@ -17,7 +17,7 @@ __date__ = "$Jun 14, 2011 11:11:01 AM$"
 from bagconfig import BAGConfig
 from bagobject import BAGObjectFabriek
 from bestuurlijkobject import BestuurlijkObjectFabriek
-from postgresdb import Database
+#from postgresdb import Database
 
 
 class Processor:
@@ -31,13 +31,10 @@ class Processor:
     #
     # Deze moeten of gestript worden, of de functie die dit automatisch doet moet worden gevonden.
 
-    def __init__(self):
-        self.database = Database()
-
     def processCSV(self, csvreader):
+        BAGConfig.logger.debug("processor.processCSV(%s)" % csvreader)
         objecten = []
         cols = next(csvreader)
-        BAGConfig.logger.debug(cols)
         for record in csvreader:
             if record[0]:
                 object = BestuurlijkObjectFabriek(cols, record)
@@ -47,13 +44,8 @@ class Processor:
                     BAGConfig.logger.warn("Geen object gevonden voor " + str(record))
 
         # Verwerk het bestand, lees gemeente_woonplaatsen in de database
-        BAGConfig.logger.info("Insert objectCount=" + str(len(objecten)))
-        self.database.verbind()
-        self.database.connection.set_client_encoding('LATIN1')
-        for object in objecten:
-            object.insert()
-            self.database.uitvoeren(object.sql, object.valuelist)
-        self.database.connection.commit()
+        BAGConfig.logger.info("%s objecten gevonden in bestand" % str(len(objecten)))
+        return objecten
 
     def processDOM(self, node):
         self.bagObjecten = []
