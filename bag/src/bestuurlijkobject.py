@@ -25,6 +25,8 @@ __date__ = "Dec 25, 2011 3:46:27 PM$"
 import datetime
 import time
 
+from bagconfig import BAGConfig
+
 def getDate(node):
     """
     Maak een datum object van een XML datum/tijd
@@ -95,7 +97,7 @@ class GemeenteWoonplaats(BestuurlijkObject):
        return "<GemeenteWoonplaats('%s','%s', '%s')>" % (self.naam, self.gemeentecode, self.woonplaatscode)
 
     def insert(self):
-        self.sql = """INSERT INTO gemeente_woonplaats (
+        self.sql = "INSERT INTO " + BAGConfig.config.schema + """.gemeente_woonplaats (
             woonplaatsnaam,
             woonplaatscode,
             begindatum_woonplaats,

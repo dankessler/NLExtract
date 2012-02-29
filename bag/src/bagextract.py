@@ -91,39 +91,37 @@ def main():
             database = Database()
             database.maak_database()
 
-        else: #ga voorlopig uit van "none", in dit geval gewoon de sql dumpen naar stdout
-            database = None
-
-        #TODO Willen we dit hardcoded?
-        #Log.log.info("Initieele data (bijv. gemeenten/provincies) inlezen...")
-        #myreader = BAGFileReader(BAGConfig.config.bagextract_home + '/db/data')
-        #myreader.process()
-
-        #Log.log.info("Views aanmaken...")
-        #db_script = os.path.realpath(BAGConfig.config.bagextract_home + '/db/script/bag-view-actueel-bestaand.sql')
-        #database.file_uitvoeren(db_script)
-
-    elif args.extract: #TODO geen args gebruiken maar BAGConfig. Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
-        # Extracts any data from any source files/dirs/zips/xml/csv etc
-        from bagfilereader import BAGFileReader
-        myreader = BAGFileReader(args.extract)
-        myreader.process()
-    elif args.query: #TODO geen args gebruiken maar BAGConfig. Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
-        # Voer willekeurig SQL script uit uit
-        if BAGConfig.config.soort == "postgres":
+        else: #ga voorlopig uit van "postgres"
             from postgresdb import Database
             database = Database()
             database.maak_database()
 
+    elif args.extract:
+        # TODO geen args gebruiken maar BAGConfig.
+        # Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
+        # Extracts any data from any source files/dirs/zips/xml/csv etc
+        from bagfilereader import BAGFileReader
+        myreader = BAGFileReader(args.extract)
+        myreader.process()
+
+    elif args.query:
+        #TODO geen args gebruiken maar BAGConfig.
+        # Op deze manier gaan beide configuraties uit de pas lopen met kans op fouten
+        # Voer willekeurig SQL script uit uit
+        if BAGConfig.config.soort == "postgres":
+            from postgresdb import Database
+            database = Database()
+
         elif BAGConfig.config.soort == "sqlite":
             from sqlitedb import Database
             database = Database()
-            database.maak_database()
 
-        else: #ga voorlopig uit van "none", in dit geval gewoon de sql dumpen naar stdout
-            database = None
+        else: #ga voorlopig uit van "postgres"
+            from postgresdb import Database
+            database = Database()
 
         database.file_uitvoeren(BAGConfig.config.query)
+
     else:
         BAGConfig.logger.critical("Kan de opdracht niet verwerken. Type -h of --help voor een overzicht van parameters")
 
