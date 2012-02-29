@@ -28,57 +28,69 @@ class Database:
         self.config = BAGConfig.config
 
     def initialiseer(self, bestand):
-        BAGConfig.logger.info('Database verbinding wordt gemaakt')
-        self.verbind(True)
+        BAGConfig.logger.debug("postgresdb.initialiseer()")
+        self.verbind()
+        self.zet_schema()
 
         try:
+            BAGConfig.logger.info("database script wordt gelezen")
             script = open(bestand, 'r').read()
             self.cursor.execute(script)
             self.connection.commit()
-
+            BAGConfig.logger.info("database script uitgevoerd")
         except psycopg2.DatabaseError:
             e = sys.exc_info()[1]
             BAGConfig.logger.critical("'%s' tijdens het inlezen van '%s'" % (str(e), str(bestand)))
             sys.exit()
 
+
     def maak_database(self):
+        BAGConfig.logger.debug("postgresdb.maak_database()")
         db_script = os.path.realpath(BAGConfig.config.bagextract_home + '/db/script/bag-db.sql')
-        BAGConfig.logger.info("De database wordt opnieuw ingericht")
+        #
         self.initialiseer(db_script)
 
-    def verbind(self, initdb=False):
+    def verbind(self):
+        BAGConfig.logger.debug("postgresdb.verbind()")
         try:
+
+            BAGConfig.logger.info('Verbinding maken met ' + self.config.database)
             self.connection = psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (self.config.database,
                                                                                                   self.config.user,
                                                                                                   self.config.host,
                                                                                                  self.config.password))
             self.cursor = self.connection.cursor()
+            BAGConfig.logger.info("Verbonden")
 
-            if initdb:
-                self.maak_schema()
-
-            self.zet_schema()
-            BAGConfig.logger.info("verbonden met database %s" % (self.config.database))
         except Exception:
+
             e = sys.exc_info()[1]
-            BAGConfig.logger.critical("ik kan geen verbinding maken met database '%s' %s" % (self.config.database,str(e)))
+            BAGConfig.logger.critical("Verbinden mislukt: %s" % (str(e)))
             #TODO: Bepalen of hier connecties en cursors moeten worden gesloten
             sys.exit()
 
-    def maak_schema(self):
-        # Public schema: no further action required
-        if self.config.schema != 'public':
-            # A specific schema is required create it and set the search path
-            self.uitvoeren('''DROP SCHEMA IF EXISTS %s CASCADE;''' % self.config.schema)
-            self.uitvoeren('''CREATE SCHEMA %s;''' % self.config.schema)
-            self.connection.commit()
-
     def zet_schema(self):
-        # Non-public schema set search path
+        BAGConfig.logger.debug("postgresdb.zet_schema()")
         if self.config.schema != 'public':
-            # Always set search path to our schema
-            self.uitvoeren('SET search_path TO %s,public' % self.config.schema)
-            self.connection.commit()
+            try:
+                self.cursor.execute('SET search_path TO %s,public' % self.config.schema)
+
+            except Exception:
+
+                self.connection.rollback()
+                BAGConfig.logger.warning('Schema %s bestaat nog niet en wordt gemaakt' % self.config.schema)
+
+                try:
+
+                    self.cursor.execute('CREATE SCHEMA %s;' % self.config.schema)
+                    self.cursor.execute('SET search_path TO %s,public' % self.config.schema)
+                    BAGConfig.logger.info("Schema %s is aangemaakt" % self.config.schema)
+
+                except Exception:
+
+                    self.connection.rollback()
+                    e = sys.exc_info()[1]
+                    BAGConfig.logger.error("Schema %s kon niet worden gemaakt: %s" % (self.config.schema,str(e)))
 
     def uitvoeren(self, sql, parameters=None):
         try:
